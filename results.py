@@ -1,7 +1,7 @@
-
 import MySQLdb
 import sys
 import pickle
+import xlwt
 
 #use the file?
 SOURCE_FILE = 1
@@ -17,6 +17,9 @@ votes =[]
 
 #dump the SQL?
 dumpSQL = True
+
+#dump to an XLS sheet?
+dumpXLS = True
 
 #+-----------+--------------+------+-----+---------+----------------+
 #| Field     | Type         | Null | Key | Default | Extra          |
@@ -185,6 +188,22 @@ def Print_Votes( votes ):
    for x in votes:
       print  x.id, x.test_id, x.pair_id, x.time_disp, x.time_vote, x.vote, x.voter, "Time taken = ", int(x.time_vote) - int(x.time_disp)
 
+
+def Dump_XLS( votes ):
+   book = xlwt.Workbook(encoding="utf-8")
+   sheet = book.add_sheet("Votes") 
+   for count,x in enumerate(votes):
+      sheet.write(count, 0, x.id ) 
+      sheet.write(count, 1, x.test_id ) 
+      sheet.write(count, 2, x.pair_id ) 
+      sheet.write(count, 3, x.time_disp ) 
+      sheet.write(count, 4, x.time_vote ) 
+      sheet.write(count, 5, x.vote ) 
+      sheet.write(count, 6, x.voter ) 
+      sheet.write(count, 7, x.comment_a ) 
+      sheet.write(count, 8, x.comment_b ) 
+   book.save( "votes.xls" )
+
 def Get_Data( ):
     global dataSource
     global dumpSQL
@@ -202,6 +221,7 @@ def Get_Data( ):
           pickle.dump(votes, file('votes.pickled', 'w'))
           pickle.dump(images, file('images.pickled', 'w'))
           pickle.dump(tests, file('tests.pickled', 'w'))
+
 
     else: # SOURCE_FILE
        votes = pickle.load(file('votes.pickled'))
@@ -253,6 +273,9 @@ def main():
     specific_test_votes = [x for x in specific_test_votes if x.voter != "rouvinen"]
 
     # Print_Votes( specific_test_votes )
+
+    if dumpXLS:
+       Dump_XLS( specific_test_votes )
 
     for x in specific_test_votes:
        vote_a = 1 if x.vote == "a" else 0
